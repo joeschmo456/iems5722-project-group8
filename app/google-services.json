@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "335953875001",
+    "project_id": "iems5722-chatroomserverapp",
+    "storage_bucket": "iems5722-chatroomserverapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335953875001:android:104313392d4b310e8ffde8",
+        "android_client_info": {
+          "package_name": "com.example.httpserverproject_1155226712"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ3-rEBUJN8gWHzOTDJud-kq1BptVELNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335953875001:android:8769bc0f7b275fdc8ffde8",
+        "android_client_info": {
+          "package_name": "hk.edu.cuhk.ie.iems5722.sandbox"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJ3-rEBUJN8gWHzOTDJud-kq1BptVELNY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
