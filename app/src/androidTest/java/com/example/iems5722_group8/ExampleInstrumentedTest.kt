@@ -1,4 +1,4 @@
-package com.example.httpserverproject_1155226712
+package com.example.iems5722_group8
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.httpserverproject_1155226712", appContext.packageName)
+        assertEquals("com.example.iems5722project_group8", appContext.packageName)
     }
 }

@@ -1,4 +1,4 @@
-package com.example.httpserverproject_1155226712
+package com.example.iems5722project_group8
 
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -31,7 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
 import androidx.compose.ui.unit.dp
-import com.example.httpserverproject_1155226712.ui.theme.HTTPServerProject_1155226712Theme
+import com.example.iems5722_group8.ui.theme.IEMS5722Project_Group8Theme
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -43,7 +43,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.KeyboardOptions
 
 import androidx.compose.material.icons.Icons
 
@@ -59,7 +58,6 @@ import androidx.compose.runtime.mutableStateListOf
 
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -97,7 +95,7 @@ class ChatActivity : ComponentActivity() {
 
         super.onCreate(savedInstanceState)
         setContent {
-            HTTPServerProject_1155226712Theme {
+            IEMS5722Project_Group8Theme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = {

@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "HTTPServerProject_1155226712"
+rootProject.name = "IEMS5722Project_Group8"
 include(":app")
  

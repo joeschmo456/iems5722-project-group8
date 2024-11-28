@@ -1,4 +1,4 @@
-package com.example.httpserverproject_1155226712
+package com.example.iems5722project_group8
 
 import android.Manifest
 
@@ -44,7 +44,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 
-import com.example.httpserverproject_1155226712.ui.theme.HTTPServerProject_1155226712Theme
+import com.example.iems5722_group8.ui.theme.IEMS5722Project_Group8Theme
 import com.google.firebase.messaging.Constants.TAG
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     fun mainPage(chatrooms: List<Chatroom>, applicationContext: Context) {
 
-        HTTPServerProject_1155226712Theme {
+        IEMS5722Project_Group8Theme {
             Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
                 TopAppBar(colors = topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -230,7 +230,7 @@ class MainActivity : ComponentActivity() {
             }
             // Register the channel with the system.
             val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }

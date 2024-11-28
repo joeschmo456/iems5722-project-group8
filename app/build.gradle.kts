@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.httpserverproject_1155226712"
+    namespace = "com.example.iems5722project_group8"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.httpserverproject_1155226712"
+        applicationId = "com.example.iems5722project_group8"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

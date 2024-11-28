@@ -1,6 +1,5 @@
-package com.example.httpserverproject_1155226712.ui.theme
+package com.example.iems5722_group8.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +33,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun HTTPServerProject_1155226712Theme(
+fun IEMS5722Project_Group8Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
