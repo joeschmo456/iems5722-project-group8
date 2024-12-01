@@ -37,6 +37,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 
 import androidx.annotation.RequiresApi
@@ -242,12 +243,14 @@ class ChatActivity : ComponentActivity() {
 
     private suspend fun getMessages() {
         withContext(Dispatchers.IO) {
-            val url = URL("http://iems5722-chatroomserverapp-1155226712.azurewebsites.net/get_messages/?chatroom_id=$chatroomId")
+            val url = URL("https://iems5722-chatroomserverapp-1155226712.azurewebsites.net/get_messages?chatroom_id=$chatroomId")
+            Log.d("ChatActivity", "Server URL: $url")
             val connection = url.openConnection() as HttpURLConnection
             try {
                 connection.requestMethod = "GET"
                 val response =
                     BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
+                Log.d("ChatActivity", "Server Response: $response")
                 val json = JSONObject(response)
                 val data = json.getJSONObject("data").getJSONArray("messages")
                 messages.clear()
@@ -272,7 +275,7 @@ class ChatActivity : ComponentActivity() {
                 val newMessageWithChatroomId: Map<String, Any> = newMessage.toMutableMap().apply {
                     put("chatroom_id", chatroomId)
                 }
-                val url = URL("http://iems5722-chatroomserverapp-1155226712.azurewebsites.net/send_message/")
+                val url = URL("https://iems5722-chatroomserverapp-1155226712.azurewebsites.net/send_message/")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 connection.setRequestProperty("Content-Type", "application/json")
