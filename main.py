@@ -1,3 +1,5 @@
+# uvicorn main:app --host 127.0.0.1 --port 8086
+
 from datetime import date
 
 from fastapi import FastAPI, HTTPException
