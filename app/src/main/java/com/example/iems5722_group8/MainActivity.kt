@@ -169,7 +169,7 @@ class MainActivity : ComponentActivity() {
 
     private suspend fun getChatroom() {
         withContext(Dispatchers.IO) {
-            val url = URL("http://10.0.2.2:8086/get_chatrooms/")
+            val url = URL("https://iems5722-chatroomserverapp-1155226712.azurewebsites.net/get_chatrooms")
             val connection = url.openConnection() as HttpURLConnection
             try {
                 connection.requestMethod = "GET"
@@ -239,7 +239,7 @@ class MainActivity : ComponentActivity() {
     private suspend fun pushTokens(newToken: Map<String, Any>): String {
         return withContext(Dispatchers.IO) {
             try {
-                val url = URL("http://iems5722-chatroomserverapp-1155226712.azurewebsites.net/submit_push_token/")
+                val url = URL("https://iems5722-chatroomserverapp-1155226712.azurewebsites.net/submit_push_token/")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 connection.setRequestProperty("Content-Type", "application/json")
