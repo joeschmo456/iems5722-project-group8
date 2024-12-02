@@ -31,6 +31,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -71,18 +72,18 @@ class MainActivity : ComponentActivity() {
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
             if (!task.isSuccessful) {
-                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
+                Log.w("MainActivity", "Fetching FCM registration token failed", task.exception)
                 return@addOnCompleteListener
             }
             val token = task.result
-            Log.d(TAG, "FCM registration token: $token")
+            Log.d("MainActivity", "FCM registration token: $token")
 
             val newTokenMap: Map<String, Any> = mapOf(
                 "user_id" to userId,
                 "token" to token
             )
 
-            // call the push function of token
+            // Call the push function of token
             CoroutineScope(Dispatchers.IO).launch {
                 pushTokens(newTokenMap)
             }
@@ -90,9 +91,9 @@ class MainActivity : ComponentActivity() {
 
         FirebaseMessaging.getInstance().subscribeToTopic("all").addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                Log.e("TAG", "onCreate: subscribeToTopic")
+                Log.e("MainActivity", "onCreate: subscribeToTopic succeeded")
             } else {
-                Log.e("TAG", "onCreate: subscribeToTopic failed")
+                Log.e("MainActivity", "onCreate: subscribeToTopic failed")
             }
         }
 
@@ -104,27 +105,31 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-
     }
 
-    // mainpage function
     @Composable
     @OptIn(ExperimentalMaterial3Api::class)
     fun mainPage(chatrooms: List<Chatroom>, applicationContext: Context) {
-
         IEMS5722Project_Group8Theme {
-            Scaffold(modifier = Modifier.fillMaxSize(), topBar = {
-                TopAppBar(colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ), title = {
-                    Text("IEMS5722")
-                }, navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Filled.Menu, null)
-                    }
-                })
-            }) { innerPadding ->
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    TopAppBar(
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            titleContentColor = MaterialTheme.colorScheme.primary,
+                        ),
+                        title = {
+                            Text("IEMS5722")
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {}) {
+                                Icon(Icons.Filled.Menu, null)
+                            }
+                        }
+                    )
+                }
+            ) { innerPadding ->
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -132,6 +137,20 @@ class MainActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Button to navigate to FriendManagementActivity
+                    OutlinedButton(
+                        onClick = {
+                            Intent(applicationContext, FriendManagementActivity::class.java).also {
+                                startActivity(it)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text("Manage Friends", fontSize = 20.sp)
+                    }
+
                     getChatroomCoro()
                     LazyColumn {
                         items(chatrooms.reversed()) { chatroom ->
@@ -147,7 +166,6 @@ class MainActivity : ComponentActivity() {
                                     .fillMaxWidth()
                                     .padding(2.dp),
                                 shape = RectangleShape
-
                             ) {
                                 Text(
                                     text = chatroom.name, fontSize = 20.sp
@@ -155,11 +173,8 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
-
-
                 }
             }
-
         }
     }
 
@@ -175,7 +190,7 @@ class MainActivity : ComponentActivity() {
                 connection.requestMethod = "GET"
                 val response =
                     BufferedReader(InputStreamReader(connection.inputStream)).use { it.readText() }
-                // parse json
+                // Parse JSON
                 val json = JSONObject(response)
                 val data = json.getJSONArray("data")
                 chatrooms.clear()
@@ -211,10 +226,7 @@ class MainActivity : ComponentActivity() {
             )
             val manager = getSystemService(NotificationManager::class.java) as NotificationManager
             manager.createNotificationChannel(channel)
-
-
         }
-
     }
 
     private fun createNotificationChannel() {
@@ -235,7 +247,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // push tokens and user_id to server
     private suspend fun pushTokens(newToken: Map<String, Any>): String {
         return withContext(Dispatchers.IO) {
             try {
@@ -269,53 +280,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-
-class MyFirebaseMessagingService : FirebaseMessagingService() {
-
-    override fun onNewToken(token: String) {
-        Log.d(TAG, "Refreshed token: $token")
-        sendRegistrationToServer(token)
-    }
-
-    private fun sendRegistrationToServer(token: String?) {
-        Log.d(TAG, "sendRegistrationTokenToServer($token)")
-    }
-
-    override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.d(TAG, "From: ${remoteMessage.from}")
-        remoteMessage.data.isNotEmpty().let {
-            Log.d(TAG, "Message data payload: ${remoteMessage.data}")
-        }
-
-        remoteMessage.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
-            sendNotification(it.title, it.body)
-        }
-    }
-
-    private fun sendNotification(title: String?, body: String?) {
-        val CHANNEL_ID = "my_channel_01"
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID).setSmallIcon(R.drawable.icon)
-            .setContentTitle(title).setContentText(body)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT).setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-        val notificationManager = NotificationManagerCompat.from(this)
-        if (ActivityCompat.checkSelfPermission(
-                this, Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-
-            return
-        }
-        val notificationId = 0
-        notificationManager.notify(notificationId, builder.build())
-
-    }
-
 }
