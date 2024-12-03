@@ -40,6 +40,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+
 # 定义User类，对应数据库中的user表
 class User(Base):
     __tablename__ = 'user'
@@ -58,17 +59,19 @@ class User(Base):
     # 定义has_login字段，对应数据库中的登录状态，默认为False，类型为布尔型
     has_login = Column(Boolean, default=False)
 
+
 # 请求体模型
 class UserLogin(BaseModel):
     account: str
     password: str
+
 
 # 登录和注册接口
 @app.post("/login")
 def login(user: UserLogin):
     db = SessionLocal()
     print(user)
-#     return 1
+    #     return 1
     db_user = db.query(User).filter(User.account == user.account).first()
 
     if db_user is None:
@@ -85,6 +88,86 @@ def login(user: UserLogin):
         return {"message": "登录成功"}
     else:
         raise HTTPException(status_code=400, detail="密码错误")
+
+
+class ProfileEdit(BaseModel):
+    password: str
+    # 定义nickname字段，对应数据库中的用户昵称，可为空
+    nickname: str
+    # 定义remark字段，对应数据库中的备注，类型为Text，可为空
+    remark: str
+    # 定义avatar字段，对应数据库中的头像（路径或URL），可为空
+    avatar: str
+
+
+# 编辑个人信息
+@app.get("/get_profiles")
+def get_profiles(account: str):
+    db = SessionLocal()
+    print(account)
+    # 匹配用户信息
+    db_user = db.query(User).filter(User.account == account).first()
+    print(db_user)
+    # 返回搜索内容
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 将用户信息转换为字典
+    user_dict = {
+        "id": db_user.id,
+        "account": db_user.account,
+        "password": db_user.password,
+        "nickname": db_user.nickname,
+        "remark": db_user.remark,
+        "avatar": db_user.avatar,
+        "has_login": db_user.has_login
+    }
+    print(user_dict)
+
+    # 返回搜索内容
+    print({"data": {"profiles": [user_dict]}, "status": "OK"})
+    return {"data": {"profiles": [user_dict]}, "status": "OK"}
+
+
+# 编辑个人信息
+@app.post("/edit_profiles")
+async def edit_profiles(request: Request):
+    item = await request.json()
+    print(request, "\n", item)
+
+    db = SessionLocal()
+    # 匹配用户信息
+    db_user = db.query(User).filter(User.account == item["account"]).first()
+    print(db_user)
+
+    db_user.password = item["password"]
+    print(db_user.password)
+    db_user.nickname = item["nickname"]
+    print(db_user.nickname)
+    db.commit()
+
+    data = {"status": "OK"}
+    print(request, "\n", data)
+    return JSONResponse(content=jsonable_encoder(data))
+
+# log out
+@app.post("/logout")
+async def logout(request: Request):
+    item = await request.json()
+    print(request, "\n", item)
+
+    db = SessionLocal()
+    # 匹配用户信息
+    db_user = db.query(User).filter(User.account == item["account"]).first()
+    print(db_user)
+
+    db_user.has_login = item["loginStatus"]
+    db.commit()
+
+    data = {"status": "OK"}
+    print(request, "\n", data)
+    return JSONResponse(content=jsonable_encoder(data))
+
 
 # get chatroom information
 @app.get("/get_chatrooms")
@@ -187,21 +270,25 @@ async def submit_push_token(request: Request):
     print(request, "\n", data)
     return JSONResponse(content=jsonable_encoder(data))
 
+
 # from app.py
 # define a route, binding a function to a URL (e.g. GET method) of the server
 @app.get("/")
 async def root():
     return {"message": "Hello World"}  # the API returns a JSON response
 
+
 @app.get("/demo/")
 async def get_demo(a: int = 0, b: int = 0, status_code=200):
-    sum = a+b
+    sum = a + b
     data = {"sum": sum, "date": date.today()}
     return JSONResponse(content=jsonable_encoder(data))
+
 
 class DemoItem(BaseModel):
     a: int
     b: int
+
 
 @app.post("/demo/")
 async def post_demo(item: DemoItem):
@@ -212,4 +299,3 @@ async def post_demo(item: DemoItem):
 
     data = {"status": "ERROR"}
     return JSONResponse(content=jsonable_encoder(data))
-
