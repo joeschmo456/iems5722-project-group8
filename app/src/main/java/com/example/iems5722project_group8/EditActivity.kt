@@ -85,8 +85,11 @@ class EditActivity : ComponentActivity() {
                         Text("Personal Profile")
                     }, navigationIcon = {
                         IconButton(onClick = {
-                            val intent = Intent(applicationContext, MainActivity::class.java)
-                            applicationContext.startActivity(intent)
+                            /*val intent = Intent(applicationContext, MainActivity::class.java)
+                            applicationContext.startActivity(intent)*/
+                            Intent(applicationContext, MainActivity::class.java).also {
+                                startActivity(it)
+                            }
 
                         }) {
                             Icon(Icons.Filled.ArrowBack, "back to main")
