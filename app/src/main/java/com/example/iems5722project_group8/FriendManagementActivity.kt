@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,6 +47,14 @@ class FriendManagementActivity : ComponentActivity() {
                     TopAppBar(
                         title = { Text("Friend Management") },
                         colors = TopAppBarDefaults.mediumTopAppBarColors(),
+                        navigationIcon = { // 添加返回按钮
+                            IconButton(onClick = { finish() }) { // 调用 finish() 方法
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack, // 使用默认返回图标
+                                    contentDescription = "Back"
+                                )
+                            }
+                        },
                     )
                 }
             ) { innerPadding ->
