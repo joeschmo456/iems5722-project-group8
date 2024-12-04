@@ -111,34 +111,39 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    // mainpage function
     @Composable
     @OptIn(ExperimentalMaterial3Api::class)
     fun mainPage(chatrooms: List<Chatroom>, applicationContext: Context) {
         IEMS5722Project_Group8Theme {
-            // add drawer
+            // Add drawer
             val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
             ModalNavigationDrawer(
                 drawerState = drawerState,
                 drawerContent = {
                     ModalDrawerSheet { /* Drawer content */
-                    PersonalProfile()
+                        PersonalProfile()
                     }
                 },
             ) {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize(), topBar = {
-                        TopAppBar(colors = topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            titleContentColor = MaterialTheme.colorScheme.primary,
-                        ), title = {
-                            Text("IEMS5722")
-                        }, navigationIcon = {
-                            IconButton(onClick = {}) {
-                                Icon(Icons.Filled.Menu, null)
+                    modifier = Modifier.fillMaxSize(),
+                    topBar = {
+                        TopAppBar(
+                            colors = topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                titleContentColor = MaterialTheme.colorScheme.primary,
+                            ),
+                            title = {
+                                Text("IEMS5722")
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = {}) {
+                                    Icon(Icons.Filled.Menu, null)
+                                }
                             }
-                        })
-                    }) { innerPadding ->
+                        )
+                    }
+                ) { innerPadding ->
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -161,7 +166,6 @@ class MainActivity : ComponentActivity() {
                                         .fillMaxWidth()
                                         .padding(2.dp),
                                     shape = RectangleShape
-
                                 ) {
                                     Text(
                                         text = chatroom.name, fontSize = 20.sp
@@ -170,13 +174,28 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-
+                        // Add the Friend Management button
+                        OutlinedButton(
+                            onClick = {
+                                Intent(applicationContext, FriendManagementActivity::class.java).also {
+                                    startActivity(it)
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            shape = RectangleShape
+                        ) {
+                            Text(
+                                text = "Friend Management", fontSize = 20.sp
+                            )
+                        }
                     }
                 }
             }
-
         }
     }
+
 
     data class Chatroom(
         val id: Int, val name: String
