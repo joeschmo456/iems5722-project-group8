@@ -312,9 +312,9 @@ async def get_chatrooms():
 @app.get("/get_messages")
 async def get_messages(chatroom_id: int):
     # check whether chatroom_id is correct or not
-    if chatroom_id not in [2, 3, 4]:
-        print("ERROR chatroom_id")
-        raise HTTPException(status_code=400, detail="ERROR chatroom_id")
+    # if chatroom_id not in [2, 3, 4]:
+    #     print("ERROR chatroom_id")
+    #     raise HTTPException(status_code=400, detail="ERROR chatroom_id")
 
     message = messages_collection.find_one({"chatroom_id": chatroom_id}, {"_id": 0, "chatroom_id": 0})
     return message
@@ -332,21 +332,21 @@ async def send_message(request: Request):
         print("ERROR list_of_keys")
         raise HTTPException(status_code=400, detail="ERROR list_of_keys")
 
-    if "chatroom_id" not in item.keys() or item["chatroom_id"] not in [2, 3, 4, "2", "3", "4"]:
-        print("ERROR chatroom_id")
-        raise HTTPException(status_code=400, detail="ERROR chatroom_id")
-
-    if "user_id" not in item.keys() or item["user_id"] not in student_list:
-        print("ERROR user_id")
-        raise HTTPException(status_code=400, detail="ERROR user_id")
-
-    if "name" not in item.keys() or len(item["name"]) > 20:
-        print("ERROR name length")
-        raise HTTPException(status_code=400, detail="ERROR name length")
-
-    if "message" not in item.keys() or len(item["message"]) > 200:
-        print("ERROR message length")
-        raise HTTPException(status_code=400, detail="ERROR message length")
+    # if "chatroom_id" not in item.keys() or item["chatroom_id"] not in [2, 3, 4, 5, "2", "3", "4", "5"]:
+    #     print("ERROR chatroom_id")
+    #     raise HTTPException(status_code=400, detail="ERROR chatroom_id")
+    #
+    # if "user_id" not in item.keys() or item["user_id"] not in student_list:
+    #     print("ERROR user_id")
+    #     raise HTTPException(status_code=400, detail="ERROR user_id")
+    #
+    # if "name" not in item.keys() or len(item["name"]) > 20:
+    #     print("ERROR name length")
+    #     raise HTTPException(status_code=400, detail="ERROR name length")
+    #
+    # if "message" not in item.keys() or len(item["message"]) > 200:
+    #     print("ERROR message length")
+    #     raise HTTPException(status_code=400, detail="ERROR message length")
 
     # remove "chatroom_id" before insertion
     chatroom_id = item["chatroom_id"]
