@@ -431,3 +431,230 @@ async def post_demo(item: DemoItem):
 
     data = {"status": "ERROR"}
     return JSONResponse(content=jsonable_encoder(data))
+
+
+# ==================================================================================================
+# ==================================================================================================
+from fastapi import FastAPI, HTTPException, Body
+from pydantic import BaseModel
+import mysql.connector
+from typing import List
+
+app = FastAPI()
+
+# 数据库连接配置
+db_config = {
+    "host": "localhost",  # 你的 MySQL 主机地址
+    "user": "root",  # 你的 MySQL 用户名
+    "password": "123456",  # 你的 MySQL 密码
+    "database": "android_project"  # 数据库名称
+}
+
+
+# 创建数据库连接
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+
+# 定义请求体模型
+class FriendRequest(BaseModel):
+    nickname: str
+
+
+class Friend(BaseModel):
+    account: int
+    nickname: str
+    has_login: bool
+
+
+# 增加好友
+@app.post("/add_friends")
+async def add_friend(request: FriendRequest):
+    print("ok1")
+
+    # 假设数据库中已经有user_id和nickname的映射关系，这里使用模拟数据
+    user_id_a = get_user_id_by_nickname(request.nickname)  # 获取用户A的ID
+    user_id_b = 2  # 假设当前用户ID是123，应该从认证系统中获取
+
+    print("ok2")
+
+    if user_id_a == user_id_b:
+        raise HTTPException(status_code=400, detail="Cannot add yourself as a friend.")
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        # 插入好友关系
+        query = "INSERT INTO friend (user_a, user_b) VALUES (%s, %s)"
+
+        print("okInsert")
+
+        print(f"user_id_a type: {type(user_id_a)}")
+        print(f"user_id_b type: {type(user_id_b)}")
+
+        cursor.execute(query, (user_id_a, user_id_b))
+
+        print("execute")
+
+        connection.commit()
+        return {"message": "Friend added successfully"}
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=f"Error: {err}")
+    finally:
+        cursor.close()
+        connection.close()
+
+
+# 删除好友
+@app.post("/delete_friends")
+async def delete_friend(request: FriendRequest):
+    # 假设数据库中已经有user_id和nickname的映射关系，这里使用模拟数据
+    user_id_a = get_user_id_by_nickname(request.nickname)  # 获取用户A的ID
+    user_id_b = 2  # 假设当前用户ID是123，应该从认证系统中获取
+
+    if user_id_a == user_id_b:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself as a friend.")
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    try:
+        # 删除好友关系
+        query = "DELETE FROM friend WHERE (user_a = %s AND user_b = %s) OR (user_a = %s AND user_b = %s)"
+        cursor.execute(query, (user_id_a, user_id_b, user_id_b, user_id_a))
+        connection.commit()
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Friend not found")
+
+        return {"message": "Friend deleted successfully"}
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=f"Error: {err}")
+    finally:
+        cursor.close()
+        connection.close()
+
+
+# # 获取好友列表
+# @app.post("/show_friends")
+# async def show_friends(request: FriendRequest):
+#     # 假设数据库中已经有user_id和nickname的映射关系，这里使用模拟数据
+#     user_id_a = get_user_id_by_nickname(request.nickname)  # 获取用户A的ID
+#
+#     connection = get_db_connection()
+#     cursor = connection.cursor(dictionary=True)
+#
+#     try:
+#         # 查询好友列表
+#         query = """
+#         SELECT f.id, f.user_a, f.user_b, u.nickname, u.has_login
+#         FROM friend f
+#         JOIN user u ON u.id = f.user_b
+#         WHERE f.user_a = %s
+#         """
+#         cursor.execute(query, (user_id_a,))
+#         friends_data = cursor.fetchall()
+#
+#         if not friends_data:
+#             return []
+#
+#         friends = [
+#             Friend(
+#                 account=friend["user_b"],
+#                 nickname=friend["nickname"],
+#                 has_login=friend["has_login"]
+#             )
+#             for friend in friends_data
+#         ]
+#
+#         print(friends)
+#
+#         return friends
+#     except mysql.connector.Error as err:
+#         raise HTTPException(status_code=500, detail=f"Error: {err}")
+#     finally:
+#         cursor.close()
+#         connection.close()
+
+# 获取用户信息
+@app.post("/show_friends")
+async def show_friends(request: FriendRequest):
+    # 假设数据库中已经有user_id和nickname的映射关系，这里使用模拟数据
+    nickname = request.nickname  # 获取传入的昵称
+
+    connection = get_db_connection()
+    cursor = connection.cursor(dictionary=True)
+
+    try:
+        # 查询 user 表，根据昵称查找用户信息
+        query = "SELECT id, nickname, has_login FROM user WHERE nickname = %s"
+        cursor.execute(query, (nickname,))
+        user_data = cursor.fetchone()  # 获取单个用户数据
+
+        if not user_data:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # 返回查询到的用户信息
+        user = {
+            "account": user_data["id"],
+            "nickname": user_data["nickname"],
+            "has_login": user_data["has_login"]
+        }
+
+        print(user)
+
+        return user  # 返回单个用户信息
+    except mysql.connector.Error as err:
+        raise HTTPException(status_code=500, detail=f"Error: {err}")
+    finally:
+        cursor.close()
+        connection.close()
+
+
+# 模拟获取用户ID的函数（实际应根据nickname查询数据库）
+def get_user_id_by_nickname(nickname: str) -> int:
+    """
+    根据用户昵称查询用户ID
+
+    Args:
+        nickname (str): 用户的昵称
+
+    Returns:
+        int: 用户的ID
+
+    Raises:
+        HTTPException: 如果找不到用户，则抛出404错误
+    """
+
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    print("ok3")
+
+    # 查询语句，查找昵称匹配的用户
+    query = "SELECT id FROM user WHERE nickname = %s"
+
+    print("ok4")
+
+    cursor.execute(query, (nickname,))
+
+    # 获取查询结果
+    user = cursor.fetchone()
+
+    print("ok5")
+    print(user)
+
+    if user:
+        # 如果找到了用户，返回用户的ID
+
+        return user[0]
+    else:
+
+        print("404")
+        # 如果没有找到用户，抛出HTTP 404异常
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # 关闭数据库连接
+    cursor.close()
+    connection.close()
