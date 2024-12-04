@@ -1,21 +1,21 @@
 package com.example.iems5722project_group8
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import android.content.Intent
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 
 class LoginActivity : ComponentActivity() {
 
@@ -38,40 +38,54 @@ class LoginActivity : ComponentActivity() {
                 .padding(32.dp),
             verticalArrangement = Arrangement.Center
         ) {
-            Text("登录", style = MaterialTheme.typography.headlineMedium)
+            Text("LOGIN",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
 
             Spacer(modifier = Modifier.height(20.dp))
 
             // 用户账号输入框
-            BasicTextField(
+            OutlinedTextField(
                 value = account,
                 onValueChange = { account = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .padding(bottom = 16.dp)
                     .border(1.dp, Color.Gray),
-                singleLine = true
+                singleLine = true,
+                label = { Text("Account") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
             )
             Spacer(modifier = Modifier.height(10.dp))
 
             // 密码输入框
-            BasicTextField(
+            OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp)
                     .border(1.dp, Color.Gray),
-                singleLine = true
+                singleLine = true,
+                label = { Text("Password") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
             Spacer(modifier = Modifier.height(20.dp))
 
             // 登录按钮
             Button(
-                onClick = { login(account, password, onLoginResult = { resultMessage -> message = resultMessage }) },
+                onClick = { login(account, password, onLoginResult = { resultMessage ->
+                    message = resultMessage
+                    if (resultMessage.startsWith("success")) {
+                        navigateToMainActivity()
+                    }
+                })
+              },
                 modifier = Modifier.fillMaxWidth()
+                    .padding(bottom = 16.dp)
             ) {
-                Text("登录")
+                Text("LOGIN")
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -111,9 +125,10 @@ class LoginActivity : ComponentActivity() {
                 // 处理响应
                 runOnUiThread {
                     if (responseCode == HttpURLConnection.HTTP_OK) {
-                        onLoginResult("登录成功: $responseMessage")
+                        onLoginResult("success: $responseMessage")
+
                     } else {
-                        onLoginResult("登录失败: $responseMessage")
+                        onLoginResult("failed: $responseMessage")
                     }
                 }
 
@@ -122,9 +137,14 @@ class LoginActivity : ComponentActivity() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 runOnUiThread {
-                    onLoginResult("网络请求失败")
+                    onLoginResult("network failed")
                 }
             }
         }.start()
+    }
+    private fun navigateToMainActivity() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish() // 结束当前 Activity，防止返回登录界面
     }
 }
