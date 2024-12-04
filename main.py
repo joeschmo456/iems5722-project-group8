@@ -89,6 +89,138 @@ def login(user: UserLogin):
     else:
         raise HTTPException(status_code=400, detail="密码错误")
 
+import json
+from typing import List, Optional, Dict, Any
+import requests
+import datetime
+import hashlib
+import hmac
+import base64
+import urllib.parse
+import json
+from pydantic import BaseModel
+from typing import Union
+class CCMessage(BaseModel):
+    role: str
+    content: str
+
+
+class ChatRequest(BaseModel):
+    messages: list[CCMessage]
+    model: Optional[str] = None
+    stream: bool = False
+
+def genHunyuanLiteSignatureHeaders(payload_string: str, id: str, key: str) -> Dict[str, str]:
+    secret_id = id
+    secret_key = key
+
+    service = 'hunyuan'
+    host = 'hunyuan.tencentcloudapi.com'
+    endpoint = f'https://{host}'
+    action = 'ChatCompletions'
+    version = '2023-09-01'
+    algorithm = 'TC3-HMAC-SHA256'
+
+    timestamp = int(datetime.datetime.now().timestamp())
+    date = datetime.datetime.utcfromtimestamp(timestamp).strftime('%Y-%m-%d')
+
+    http_request_method = 'POST'
+    canonical_uri = '/'
+    canonical_querystring = ''
+    contentType = 'application/json; charset=utf-8'
+    payload = payload_string
+
+    canonical_headers = (
+            'content-type:' + contentType + '\n' +
+            'host:' + host + '\n' +
+            'x-tc-action:' + action.lower() + '\n'
+    )
+    signed_headers = 'content-type;host;x-tc-action'
+    hashed_request_payload = hashlib.sha256(payload.encode('utf-8')).hexdigest()
+
+    canonical_request = (
+            http_request_method + '\n' +
+            canonical_uri + '\n' +
+            canonical_querystring + '\n' +
+            canonical_headers + '\n' +
+            signed_headers + '\n' +
+            hashed_request_payload
+    )
+
+    credential_scope = f'{date}/{service}/tc3_request'
+    hashed_canonical_request = hashlib.sha256(canonical_request.encode('utf-8')).hexdigest()
+    string_to_sign = (
+            algorithm + '\n' +
+            str(timestamp) + '\n' +
+            credential_scope + '\n' +
+            hashed_canonical_request
+    )
+
+    def sign(key: bytes, msg: str) -> bytes:
+        hmac_sha256 = hmac.new(key, msg.encode('utf-8'), hashlib.sha256)
+        return hmac_sha256.digest()
+
+    secret_date = sign(('TC3' + secret_key).encode('utf-8'), date)
+    secret_service = sign(secret_date, service)
+    secret_signing = sign(secret_service, 'tc3_request')
+    signature = hmac.new(secret_signing, string_to_sign.encode('utf-8'), hashlib.sha256).hexdigest()
+
+    authorization = (
+            algorithm + ' Credential=' + secret_id + '/' + credential_scope + ', SignedHeaders=' + signed_headers + ', Signature=' + signature
+    )
+
+    headers = {
+        "X-TC-Action": action,
+        "X-TC-Version": version,
+        "X-TC-Timestamp": str(timestamp),
+        "Content-Type": contentType,
+        "Authorization": authorization,
+    }
+
+    return headers
+
+def queryCusLLMSpecList(platform: str) -> list:
+    return [{"cusLlm": "tencent_Hunyuan_Lite", "model": "hunyuan-lite"}]
+
+@app.post("/tencent-cc-resp")
+async def tencent_cc_resp(request: ChatRequest):
+    specs = queryCusLLMSpecList("tencent")
+    model = request.model or \
+            next((e["model"] for e in specs if e["cusLlm"] == "tencent_Hunyuan_Lite"), None)
+    if model is None:
+        raise HTTPException(status_code=400, detail="Model not found")
+
+    temp_body = {
+        "Model": model,
+        "Stream": request.stream,
+        "Messages": [{"Role": m.role, "Content": m.content} for m in request.messages]
+    }
+
+    secret_id = "AKIDx15DNYo9QVP8evxlaSF768EPZkyGd6a3"  # 这里需要替换为实际获取用户密钥的逻辑，比如从配置文件、数据库等获取
+    secret_key = "UsGe1VxNxV0U4eI1qlfrHjGkLyiVME99"  # 同理，替换为实际的密钥
+    header = genHunyuanLiteSignatureHeaders(
+        json.dumps(temp_body),
+        secret_id,
+        secret_key
+    )
+
+    try:
+        response = requests.post(
+            "https://hunyuan.tencentcloudapi.com",
+            headers=header,
+            json=temp_body
+        )
+        response.raise_for_status()
+        if request.stream:
+            # 处理流式响应，这里简化处理，实际可能需要更精细的逻辑来解析和返回流式数据
+            return {"stream_data": response.iter_lines()}
+        else:
+            return response.json()
+    except requests.RequestException as e:
+        raise HTTPException(status_code=500, detail=f"Request error: {str(e)}")
+
+# var TENCENT_SECRET_ID = "AKIDx15DNYo9QVP8evxlaSF768EPZkyGd6a3";
+# var TENCENT_SECRET_KEY = "UsGe1VxNxV0U4eI1qlfrHjGkLyiVME99";
 
 class ProfileEdit(BaseModel):
     password: str
