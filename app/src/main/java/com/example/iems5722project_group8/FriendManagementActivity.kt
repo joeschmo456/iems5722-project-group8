@@ -151,7 +151,7 @@ class FriendManagementActivity : ComponentActivity() {
     private suspend fun addFriend(nickname: String): String {
         return withContext(Dispatchers.IO) {
             try {
-                val url = URL("http://10.0.2.2:8000/add_friends")
+                val url = URL("http://10.0.2.2:8086/add_friends")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 connection.setRequestProperty("Content-Type", "application/json")
@@ -182,7 +182,7 @@ class FriendManagementActivity : ComponentActivity() {
     private suspend fun deleteFriend(nickname: String): String {
         return withContext(Dispatchers.IO) {
             try {
-                val url = URL("http://10.0.2.2:8000/delete_friends")
+                val url = URL("http://10.0.2.2:8086/delete_friends")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 connection.setRequestProperty("Content-Type", "application/json")
@@ -213,7 +213,7 @@ class FriendManagementActivity : ComponentActivity() {
 //    private suspend fun fetchFriends(nickname: String): List<Friend> {
 //        return withContext(Dispatchers.IO) {
 //            try {
-//                val url = URL("http://10.0.2.2:8000/show_friends")
+//                val url = URL("http://10.0.2.2:8086/show_friends")
 //                val connection = url.openConnection() as HttpURLConnection
 //                connection.requestMethod = "POST"
 //                connection.setRequestProperty("Content-Type", "application/json")
@@ -253,7 +253,7 @@ class FriendManagementActivity : ComponentActivity() {
     private suspend fun fetchFriends(nickname: String): List<Friend> {
         return withContext(Dispatchers.IO) {
             try {
-                val url = URL("http://10.0.2.2:8000/show_friends")
+                val url = URL("http://10.0.2.2:8086/show_friends")
                 val connection = url.openConnection() as HttpURLConnection
                 connection.requestMethod = "POST"
                 connection.setRequestProperty("Content-Type", "application/json")

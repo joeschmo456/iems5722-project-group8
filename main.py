@@ -12,6 +12,9 @@ from pymongo import MongoClient
 from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import mysql.connector
+
+from mysql.connector import Error
 
 # for testing, you can update this one to your student ID
 student_list = [123456789, "123456789", 1155226712, "1155226712"]
@@ -79,13 +82,13 @@ def login(user: UserLogin):
         new_user = User(account=user.account, password=user.password, has_login=True)
         db.add(new_user)
         db.commit()
-        return {"message": "用户注册成功"}
+        return {"message": "Register successfully"}
 
     # 用户已注册，验证密码
     if db_user.password == user.password:
         db_user.has_login = True
         db.commit()
-        return {"message": "登录成功"}
+        return {"message": "Login successfully"}
     else:
         raise HTTPException(status_code=400, detail="密码错误")
 
@@ -232,19 +235,19 @@ class ProfileEdit(BaseModel):
     avatar: str
 
 
-# 编辑个人信息
+# edit personal profile
 @app.get("/get_profiles")
 def get_profiles(account: str):
     db = SessionLocal()
     print(account)
-    # 匹配用户信息
+
     db_user = db.query(User).filter(User.account == account).first()
     print(db_user)
-    # 返回搜索内容
+    # return the information
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # 将用户信息转换为字典
+    # to info into dictionary
     user_dict = {
         "id": db_user.id,
         "account": db_user.account,
@@ -256,19 +259,19 @@ def get_profiles(account: str):
     }
     print(user_dict)
 
-    # 返回搜索内容
+    # return results
     print({"data": {"profiles": [user_dict]}, "status": "OK"})
     return {"data": {"profiles": [user_dict]}, "status": "OK"}
 
 
-# 编辑个人信息
+# edit personal profile
 @app.post("/edit_profiles")
 async def edit_profiles(request: Request):
     item = await request.json()
     print(request, "\n", item)
 
     db = SessionLocal()
-    # 匹配用户信息
+    # find the correct profiles
     db_user = db.query(User).filter(User.account == item["account"]).first()
     print(db_user)
 
@@ -302,10 +305,10 @@ async def logout(request: Request):
 
 
 # get chatroom information
-@app.get("/get_chatrooms")
-async def get_chatrooms():
-    chatroom = chatrooms_collection.find_one({}, {"_id": 0})
-    return chatroom
+# @app.get("/get_chatrooms")
+# async def get_chatrooms():
+#     chatroom = chatrooms_collection.find_one({}, {"_id": 0})
+#     return chatroom
 
 
 # get message information according to chatroom_id
@@ -331,22 +334,6 @@ async def send_message(request: Request):
     if len(list_of_keys) != 5:
         print("ERROR list_of_keys")
         raise HTTPException(status_code=400, detail="ERROR list_of_keys")
-
-    # if "chatroom_id" not in item.keys() or item["chatroom_id"] not in [2, 3, 4, 5, "2", "3", "4", "5"]:
-    #     print("ERROR chatroom_id")
-    #     raise HTTPException(status_code=400, detail="ERROR chatroom_id")
-    #
-    # if "user_id" not in item.keys() or item["user_id"] not in student_list:
-    #     print("ERROR user_id")
-    #     raise HTTPException(status_code=400, detail="ERROR user_id")
-    #
-    # if "name" not in item.keys() or len(item["name"]) > 20:
-    #     print("ERROR name length")
-    #     raise HTTPException(status_code=400, detail="ERROR name length")
-    #
-    # if "message" not in item.keys() or len(item["message"]) > 200:
-    #     print("ERROR message length")
-    #     raise HTTPException(status_code=400, detail="ERROR message length")
 
     # remove "chatroom_id" before insertion
     chatroom_id = item["chatroom_id"]
@@ -435,18 +422,18 @@ async def post_demo(item: DemoItem):
 
 # ==================================================================================================
 # ==================================================================================================
-from fastapi import FastAPI, HTTPException, Body
-from pydantic import BaseModel
-import mysql.connector
-from typing import List
-
-app = FastAPI()
-
-# 数据库连接配置
+# from fastapi import FastAPI, HTTPException, Body
+# from pydantic import BaseModel
+# import mysql.connector
+# from typing import List
+#
+# app = FastAPI()
+#
+# # 数据库连接配置
 db_config = {
     "host": "localhost",  # 你的 MySQL 主机地址
     "user": "root",  # 你的 MySQL 用户名
-    "password": "123456",  # 你的 MySQL 密码
+    "password": "root",  # 你的 MySQL 密码
     "database": "android_project"  # 数据库名称
 }
 
@@ -474,7 +461,8 @@ async def add_friend(request: FriendRequest):
 
     # 假设数据库中已经有user_id和nickname的映射关系，这里使用模拟数据
     user_id_a = get_user_id_by_nickname(request.nickname)  # 获取用户A的ID
-    user_id_b = 2  # 假设当前用户ID是123，应该从认证系统中获取
+    print(user_id_a)
+    user_id_b = 1  # 假设当前用户ID是123，应该从认证系统中获取
 
     print("ok2")
 
@@ -508,10 +496,10 @@ async def add_friend(request: FriendRequest):
 
 # 删除好友
 @app.post("/delete_friends")
-async def delete_friend(request: FriendRequest):
+async def delete_friends(request: FriendRequest):
     # 假设数据库中已经有user_id和nickname的映射关系，这里使用模拟数据
     user_id_a = get_user_id_by_nickname(request.nickname)  # 获取用户A的ID
-    user_id_b = 2  # 假设当前用户ID是123，应该从认证系统中获取
+    user_id_b = 1  # 假设当前用户ID是123，应该从认证系统中获取
 
     if user_id_a == user_id_b:
         raise HTTPException(status_code=400, detail="Cannot delete yourself as a friend.")
